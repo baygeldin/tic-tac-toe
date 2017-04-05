@@ -1,3 +1,5 @@
+// This file contains an implementation of server's public interface.
+
 const http = require('http')
 const fs = require('fs')
 const path = require('path')
@@ -11,15 +13,13 @@ let app = new Koa()
 let server = http.createServer(app.callback())
 let io = socket(server)
 
-// TODO: 404 template, comment, modules
-
-// Collection of all current games
+// Collection of all current games.
 let games = []
 
 io.on('connection', (socket) => {
   let game, player
 
-  // Checks if the user has joined some game
+  // Checks if the user has joined some game.
   function checkGame (fn) {
     if (!game) fn('No game assigned.')
     return !!game
@@ -28,15 +28,15 @@ io.on('connection', (socket) => {
   socket.on('join', (id, fn) => {
     fn = fn || (() => {})
 
-    // Associate a specific game with a socket
+    // Associate a specific game with a socket.
     game = games.find((g) => g.id === id)
 
-    // Allow only two players
+    // Allow only two players.
     try {
-      // player === 1 means crosses, 2 means noughts
+      // player === 1 means crosses, 2 means noughts.
       player = game.join()
 
-      // Notify users when the game is over
+      // Notify users when the game is over.
       game.on('end', (p) => {
         p === player ? socket.emit('win') : socket.emit('lose')
       })
@@ -47,7 +47,7 @@ io.on('connection', (socket) => {
       fn(e.message)
     }
 
-    // Emit start when 2nd player joins the game
+    // Emit start when 2nd player joins the game.
     if (game.players === 2) {
       io.to(id).emit('start', game.config)
     }

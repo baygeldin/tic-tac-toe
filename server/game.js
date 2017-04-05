@@ -1,3 +1,5 @@
+// This file contains an implementation of tic-tac-toe game.
+
 const { EventEmitter } = require('events')
 const crypto = require('crypto')
 const debug = require('debug')('game')

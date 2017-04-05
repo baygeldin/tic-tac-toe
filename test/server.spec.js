@@ -9,19 +9,19 @@ const Promise = require('bluebird')
 const io = require('socket.io-client')
 const { server, io: ioServer } = require('../server/index.js')
 
-// Chai configuration
+// Chai configuration.
 chai.use(chaiAsPromised)
 const expect = chai.expect
 
 let host = `http://localhost:${server.address().port}`
 let defaultConfig = { size: 3, line: 3 }
 
-// Resolves when a specific event happens
+// Resolves when a specific event happens.
 function wait(emitter, type) {
   return new Promise((resolve) => emitter.once(type, resolve))
 }
 
-// Emits a message and resolves with acknowledgement or gets rejected
+// Emits a message and resolves with acknowledgement or gets rejected.
 function emit(emitter, type, ...args) {
   return Promise.promisify(emitter.emit, { context: emitter })(type, ...args)
 }
@@ -30,7 +30,7 @@ describe('server', () => {
   let game, players
 
   beforeEach(async () => {
-    // Get game's ID
+    // Get game's ID.
     await request(server)
       .get('/')
       .expect(302)
@@ -38,10 +38,10 @@ describe('server', () => {
         game = res.headers.location.substring(1)
       })
 
-    // Create players
+    // Create players.
     players = [null, null].map((p) => io.connect(host))
 
-    // Wait for players to connect
+    // Wait for players to connect.
     await Promise.all(players.map((p) => wait(p, 'connect')))
   })
 
@@ -50,56 +50,56 @@ describe('server', () => {
   })
 
   it('starts a game when 2nd player joins', async () => {
-    // Wait for 1st player to join
+    // Wait for 1st player to join.
     await emit(players[0], 'join', game)
-    // Check state (shouldn't be in started state)
+    // Check state (shouldn't be in started state).
     let state = await emit(players[0], 'state')
     expect(state.started).to.equal(false)
-    // 2nd player joins the game
+    // 2nd player joins the game.
     players[1].emit('join', game)
-    // Both users should get a 'start' message
+    // Both users should get a 'start' message.
     await Promise.all(players.map((p) => wait(p, 'start')))
   })
 
   it('starts a game with a correct configuration', async () => {
-    // Wait for 1st player to join
+    // Wait for 1st player to join.
     await emit(players[0], 'join', game)
-    // 1t player changes configuration
+    // 1t player changes configuration.
     let config = { size: 10, line: 4 }
     await emit(players[0], 'configure', config)
-    // 2nd player joins the game
+    // 2nd player joins the game.
     players[1].emit('join', game)
-    // 'start' message should come with a correct confuguration
+    // 'start' message should come with a correct confuguration.
     let startConfig = await wait(players[1], 'start')
     expect(startConfig).to.deep.equal(config)
   })
 
   it('denies wrong configurations', async () => {
-    // Wait for 1st player to join
+    // Wait for 1st player to join.
     await emit(players[0], 'join', game)
 
-    // 1st player shouldn't be able to set this configuration
+    // 1st player shouldn't be able to set this configuration.
     let config = { size: 0, line: 0 }
     await expect(emit(players[0], 'configure', config)).to.be.rejected
 
-    // The state should also have a correct configuration 
+    // The state should also have a correct configuration.
     let state = await emit(players[0], 'state')
     expect(state.config).to.deep.equal(defaultConfig)
   })
 
   describe('game started', () => {
     beforeEach(async () => {
-      // Wait for a game to start
+      // Wait for a game to start.
       players.forEach((p) => p.emit('join', game))
       await Promise.all(players.map((p) => wait(p, 'start')))
     })
 
     it('allows only two players', async () => {
-      // Wait for 3rd player to connect
+      // Wait for 3rd player to connect.
       let third = io.connect(host)
       await wait(third, 'connect')
 
-      // 3rd player shouldn't be able to join the game
+      // 3rd player shouldn't be able to join the game.
       await expect(emit(third, 'join', game)).to.be.rejected
 
       let sockets = ioServer.sockets.adapter.rooms[game].sockets
@@ -107,62 +107,62 @@ describe('server', () => {
     })
 
     it('denies to change a configuration', async () => {
-      // 1t player shouldn't be able to set configuration
+      // 1t player shouldn't be able to set configuration.
       let config = { size: 10, line: 4 }
       await expect(emit(players[0], 'configure', config)).to.be.rejected
 
-      // The state should also have a correct configuration 
+      // The state should also have a correct configuration. 
       let state = await emit(players[0], 'state')
       expect(state.config).to.deep.equal(defaultConfig)
     })
 
     it('accepts valid moves', async () => {
-      // 1st player makes a valid move
+      // 1st player makes a valid move.
       let move = { x: 1, y: 1 }
       players[0].emit('move', move)
-      // 2nd player should receive it
+      // 2nd player should receive it.
       let newMove = await wait(players[1], 'move')
       expect(newMove).to.deep.equal(move)
     })
 
     it('denies wrong moves', async () => {
-      // 1st player shouldn't be able to make this move
+      // 1st player shouldn't be able to make this move.
       await expect(emit(players[0], 'move', { x: 10, y: 10 })).to.be.rejected
 
-      // The state should also have a correct data 
+      // The state should also have a correct data.
       let state = await emit(players[0], 'state')
       expect(state.board).to.deep.equal(
         [[0, 0, 0], [0, 0, 0], [0, 0, 0]])
     })
 
     it('keeps player\'s turns in order', async () => {
-      // 1st player goes first
+      // 1st player goes first.
       let state = await emit(players[0], 'state')
       expect(state.next).to.equal(1)
-      // 1st player makes a valid move
+      // 1st player makes a valid move.
       await emit(players[0], 'move', { x: 1, y: 1 })
-      // State should update
+      // State should update.
       state = await emit(players[0], 'state')
       expect(state.next).to.equal(2)
 
-      // 1st player shouldn't be able to make this move
+      // 1st player shouldn't be able to make this move.
       await expect(emit(players[0], 'move', { x: 2, y: 2 })).to.be.rejected
 
-      // The state should also have a correct data 
+      // The state should also have a correct data.
       state = await emit(players[0], 'state')
       expect(state.board).to.deep.equal(
         [[0, 0, 0], [0, 1, 0], [0, 0, 0]])
     })
 
     it('notifies when there is a winner', async () => {
-      // Players make moves in turns
+      // Players make moves in turns.
       let turns = [[1, 1], [0, 0], [0, 2], [1, 0]]
       for (let i = 0; i < turns.length; i++) {
         await emit(players[i % 2], 'move', { x: turns[i][0], y: turns[i][1] })
       }
-      // 1st player makes a winning move
+      // 1st player makes a winning move.
       players[0].emit('move', { x: 2, y: 0 })
-      // Corresponding messages are sent to both clients
+      // Corresponding messages are sent to both clients.
       await Promise.all([
         wait(players[0], 'win'),
         wait(players[1], 'lose')
@@ -170,17 +170,17 @@ describe('server', () => {
     })
 
     it('notifies a player when other player disconnects', async () => {
-      // 1st player disconnects
+      // 1st player disconnects.
       players[0].disconnect()
-      // 2nd player should receive an error message
+      // 2nd player should receive an error message.
       await wait(players[1], 'interrupt')
     })
 
     it('exchanges messages between players', async () => {
-      // 1st sends a message to the chat
+      // 1st sends a message to the chat.
       let msg = 'Ayyo, what you up to?'
       players[0].emit('message', msg)
-      // 2nd player should receive it
+      // 2nd player should receive it.
       let newMsg = await wait(players[1], 'message')
       expect(newMsg).to.deep.equal(msg)
     })
