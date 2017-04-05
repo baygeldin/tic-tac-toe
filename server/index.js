@@ -111,8 +111,20 @@ io.on('connection', (socket) => {
   })
 })
 
+let readFile = Promise.promisify(fs.readFile)
+
+// Serve custom Not Found page.
 app.use(async (ctx, next) => {
-  if (ctx.path === '/') {
+  await next()
+
+  if (ctx.status === 404) {
+    ctx.body = await readFile(path.resolve(__dirname, '../static/404.html'), 'utf-8')
+  }
+})
+
+// Create a new game when users accesses root.
+app.use(async (ctx, next) => {
+  if (ctx.path === '/' || ctx.path === '/index.html') {
     let game = new Game()
     games.push(game)
     ctx.redirect(`/${game.id}`)
@@ -120,14 +132,15 @@ app.use(async (ctx, next) => {
   await next()
 })
 
-let readFile = Promise.promisify(fs.readFile)
-
+// Return index.html for all open games.
 app.use(async (ctx, next) => {
   if (games.find((g) => g.id === ctx.path.substring(1) && !g.started)) {
-    ctx.body = await readFile('../static/index.html', 'utf-8')
+    ctx.body = await readFile(path.resolve(__dirname, '../static/index.html'), 'utf-8')
   }
+  await next()
 })
 
+// Serve static assets.
 app.use(serve(path.resolve(__dirname, '../static')))
 
 server.listen(process.env.PORT || 3000)
