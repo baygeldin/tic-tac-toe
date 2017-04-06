@@ -2,7 +2,7 @@
 
 const { EventEmitter } = require('events')
 const crypto = require('crypto')
-const debug = require('debug')('game')
+const debug = require('debug')('tic-tac-toe:game')
 
 const MIN_SIZE = 3
 const MIN_LINE = 3
