@@ -87,11 +87,15 @@ describe('server', () => {
     expect(state.config).to.deep.equal(defaultConfig)
   })
 
-  describe('game started', () => {
+  describe('game', () => {
     beforeEach(async () => {
+      let start = Promise.all(players.map((p) => wait(p, 'start')))
+      // 1st player to join gets crosses
+      await emit(players[0], 'join', game)
+      // 2st player to join gets noughts
+      await emit(players[1], 'join', game)
       // Wait for a game to start.
-      players.forEach((p) => p.emit('join', game))
-      await Promise.all(players.map((p) => wait(p, 'start')))
+      await start
     })
 
     it('allows only two players', async () => {
