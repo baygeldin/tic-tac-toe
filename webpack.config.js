@@ -1,4 +1,4 @@
-// This file contains webpack configurations for deploying and testing.
+// This file contains webpack configuration for bundling the application.
 
 const path = require('path')
 const webpack = require('webpack')
@@ -6,13 +6,27 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin')
 
 const PROD = process.env.NODE_ENV === 'production'
 
-// Common configuration settings.
-let defaultConfig = {
+let plugins = [
+  new ExtractTextPlugin({ filename: 'style.css', allChunks: true }),
+  new webpack.NoEmitOnErrorsPlugin()
+]
+
+// Minify in production.
+if (PROD) config.plugins.push(new webpack.optimize.UglifyJsPlugin())
+
+module.exports = {
+  entry: path.resolve(__dirname, 'client/index.jsx'),
+
+  output: {
+    path: path.resolve(__dirname, 'static/dist'),
+    filename: 'bundle.js'
+  },
+
   module: {
     rules: [{
       test: /\.(js|jsx)$/,
       use: 'babel-loader',
-      include: path.resolve(__dirname, 'client')
+      exclude: path.resolve(__dirname, 'node_modules')
     }, {
       test: /\.css$/,
       use: ExtractTextPlugin.extract({
@@ -28,9 +42,11 @@ let defaultConfig = {
           'postcss-loader'
         ]
       }),
-      include: path.resolve(__dirname, 'client')
+      exclude: path.resolve(__dirname, 'node_modules')
     }]
   },
+
+  plugins,
 
   resolve: {
     alias: {
@@ -39,50 +55,13 @@ let defaultConfig = {
     extensions: ['.jsx', '.js', '.json']
   },
 
+  externals: {
+    'socket.io': 'io'
+  },
+
   devtool: 'source-map',
 
   watchOptions: {
     aggregateTimeout: 500
   }
 }
-
-// Yields a bundle that is inserted on the main page.
-let prodConfig = Object.assign({}, defaultConfig, {
-  entry: path.resolve(__dirname, 'client/index.jsx'),
-
-  output: {
-    path: path.resolve(__dirname, 'static/dist'),
-    filename: 'bundle.js'
-  },
-
-  externals: {
-    'socket.io': 'io'
-  },
-
-  plugins: [
-    new ExtractTextPlugin({ filename: 'style.css', allChunks: true }),
-    new webpack.NoEmitOnErrorsPlugin()
-  ]
-})
-
-// Minify in production.
-if (PROD) prodConfig.plugins.push(new webpack.optimize.UglifyJsPlugin())
-
-// Yields a commonjs main component that's testable with enzyme.
-let testConfig = Object.assign({}, defaultConfig, {
-  entry: path.resolve(__dirname, 'client/components/main/index.jsx'),
-
-  output: {
-    path: path.resolve(__dirname, 'static/dist'),
-    filename: 'main-component.bundle.js',
-    libraryTarget: 'commonjs2'
-  },
-
-  plugins: [
-    new ExtractTextPlugin({ filename: 'main-component.style.css', allChunks: true }),
-    new webpack.NoEmitOnErrorsPlugin()
-  ]
-})
-
-// Don't build test configuration in production.
-module.exports = PROD ? prodConfig : [prodConfig, testConfig]
