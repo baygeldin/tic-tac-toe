@@ -1,7 +1,7 @@
 // This file contains Karma configuration for running UI tests.
 
 const { module: webpackModule, resolve,
-  plugins } = require('./webpack.config.js')
+  externals, plugins } = require('./webpack.config.js')
 
 module.exports = (config) => {
   config.set({
@@ -10,11 +10,13 @@ module.exports = (config) => {
     frameworks: ['mocha'],
 
     files: [
-      'test/client.spec.js'
+      'node_modules/babel-polyfill/dist/polyfill.js',
+      'node_modules/socket.io-client/dist/socket.io.js',
+      'test/client.spec.jsx'
     ],
 
     preprocessors: {
-      '{client,test}/**/*.{js,jsx}': ['webpack', 'sourcemap'],
+      '{client,test}/**/*.{js,jsx}': ['webpack', 'sourcemap']
     },
 
     webpack: {
@@ -22,12 +24,12 @@ module.exports = (config) => {
       resolve,
       devtool: 'inline-source-map',
       module: webpackModule,
-      externals: {
+      externals: Object.assign({}, externals, {
         'cheerio': 'window',
         'react/addons': 'react',
         'react/lib/ExecutionEnvironment': 'react',
-        'react/lib/ReactContext': 'react',
-      }
+        'react/lib/ReactContext': 'react'
+      })
     },
 
     webpackServer: {
@@ -43,6 +45,12 @@ module.exports = (config) => {
     ],
 
     reporters: ['mocha'],
+
+    browserConsoleLogOptions: {
+      level: 'log',
+      format: '%b %T: %m',
+      terminal: true
+    },
 
     port: 9876,
 
