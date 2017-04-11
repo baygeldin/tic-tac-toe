@@ -1,0 +1,26 @@
+@import "../shared/vars.css";
+
+.form {
+  composes: global(pure-form);
+  display: flex;
+}
+
+.form input:not([type]) {
+  background-color: #fff;
+  flex: 1;
+}
+
+.button {
+  composes: global(pure-button);
+  transform: translateY(-1px);
+  padding: 0.5em 0.8em;
+  margin: 0 0 0 5px;
+}
+
+.clear {
+  clear: both;
+}
+
+.border {
+  border: 1px dotted $turquoise;
+}

@@ -1,0 +1,17 @@
+@import "../shared/vars.css";
+
+.wrap {
+  position: absolute;
+  display: flex;
+  width: $board-size;
+  height: $board-size;
+}
+
+.popup {
+  margin: auto;
+  padding: 15px 30px;
+  composes: border from '../shared/style.css';
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 5px;
+  text-align: center;
+}

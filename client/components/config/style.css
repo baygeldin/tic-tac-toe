@@ -1,0 +1,9 @@
+.select {
+  margin: 0 15px 0 5px;
+  height: 1.8em;
+  padding: 0 .6em;
+}
+
+.checkbox {
+  transform: translateY(2px);
+}

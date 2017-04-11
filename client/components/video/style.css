@@ -1,0 +1,7 @@
+@import "../shared/vars.css";
+
+.video {
+  width: 100%;
+  height: $video-height;
+  background-color: rgba(0, 0, 0, 0.2);
+}

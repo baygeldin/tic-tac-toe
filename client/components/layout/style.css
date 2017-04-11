@@ -1,0 +1,58 @@
+@import "../shared/vars.css";
+
+:global {
+  html, body, #app {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+  }
+
+  a {
+    color: $turquoise;
+  }
+}
+
+@font-face {
+  font-family: tradizional;
+  src: url(./upheaval.ttf);
+}
+
+.wrap {
+  background: url('./bg.png');
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+.main {
+  margin: auto;
+}
+
+.logo {
+  font-family: tradizional;
+  font-size: 40px;
+  text-align: center;
+  color: $turquoise;
+}
+
+.content {
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 15px;
+  composes: border from '../shared/style.css';
+}
+
+.game {
+  width: $board-size;
+  height: $board-size;
+  float: left;
+}
+
+.sidebar {
+  width: $sidebar-size;
+  height: $board-size;
+  display: flex;
+  flex-direction: column;
+  margin: 0 0 0 calc($board-size + 5px);
+}

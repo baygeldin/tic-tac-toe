@@ -1,0 +1,8 @@
+export const START = 'tic-tac-toe/START'
+export const CONFIGURE = 'tic-tac-toe/CONFIGURE'
+export const MOVE = 'tic-tac-toe/MOVE'
+export const MESSAGE = 'tic-tac-toe/MESSAGE'
+export const FINISH = 'tic-tac-toe/FINISH'
+export const INTERRUPT = 'tic-tac-toe/INTERRUPT'
+export const OFFER = 'tic-tac-toe/OFFER'
+export const SIGNAL = 'tic-tac-toe/SIGNAL'
