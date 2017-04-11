@@ -1,3 +1,5 @@
+// This file contains an implementation of server's public interface.
+
 const debug = require('debug')('tic-tac-toe:api')
 
 module.exports = (io, games) => {

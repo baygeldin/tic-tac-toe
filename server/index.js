@@ -1,4 +1,4 @@
-// This file contains an implementation of server's public interface.
+// This file contains initialization and configuration of the server.
 
 const http = require('http')
 const fs = require('fs')

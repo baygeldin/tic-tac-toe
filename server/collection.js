@@ -1,5 +1,4 @@
-// This file contains an implementation of tic-tac-toe game
-// (with some additional application specific features).
+// This file contains a collection for storing application data (in memory).
 
 const debug = require('debug')('tic-tac-toe:collection')
 const Game = require('./game.js')
