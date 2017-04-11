@@ -14,15 +14,15 @@ chai.use(chaiAsPromised)
 const expect = chai.expect
 
 let host = `http://localhost:${server.address().port}`
-let defaultConfig = { size: 3, line: 3 }
+let defaultConfig = { size: 3, line: 3, enableVideo: true }
 
 // Resolves when a specific event happens.
-function wait(emitter, type) {
+function wait (emitter, type) {
   return new Promise((resolve) => emitter.once(type, resolve))
 }
 
 // Emits a message and resolves with acknowledgement or gets rejected.
-function emit(emitter, type, ...args) {
+function emit (emitter, type, ...args) {
   return Promise.promisify(emitter.emit, { context: emitter })(type, ...args)
 }
 
@@ -50,22 +50,27 @@ describe('server', () => {
   })
 
   it('starts a game when 2nd player joins', async () => {
+    let start = Promise.all(players.map((p) => wait(p, 'start')))
     // Wait for 1st player to join.
-    await emit(players[0], 'join', game)
+    let player = await emit(players[0], 'join', game)
+    // 1st player should get crosses
+    expect(player).to.equal(1)
     // Check state (shouldn't be in started state).
     let state = await emit(players[0], 'state')
     expect(state.started).to.equal(false)
     // 2nd player joins the game.
-    players[1].emit('join', game)
+    player = await emit(players[1], 'join', game)
+    // 2st player should get noughts
+    expect(player).to.equal(2)
     // Both users should get a 'start' message.
-    await Promise.all(players.map((p) => wait(p, 'start')))
+    await start
   })
 
   it('starts a game with a correct configuration', async () => {
     // Wait for 1st player to join.
     await emit(players[0], 'join', game)
     // 1t player changes configuration.
-    let config = { size: 10, line: 4 }
+    let config = { size: 10, line: 4, enableVideo: true }
     await emit(players[0], 'configure', config)
     // 2nd player joins the game.
     players[1].emit('join', game)
@@ -79,7 +84,7 @@ describe('server', () => {
     await emit(players[0], 'join', game)
 
     // 1st player shouldn't be able to set this configuration.
-    let config = { size: 0, line: 0 }
+    let config = { size: 0, line: 0, enableVideo: true }
     await expect(emit(players[0], 'configure', config)).to.be.rejected
 
     // The state should also have a correct configuration.
@@ -115,7 +120,7 @@ describe('server', () => {
       let config = { size: 10, line: 4 }
       await expect(emit(players[0], 'configure', config)).to.be.rejected
 
-      // The state should also have a correct configuration. 
+      // The state should also have a correct configuration.
       let state = await emit(players[0], 'state')
       expect(state.config).to.deep.equal(defaultConfig)
     })
