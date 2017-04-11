@@ -6,6 +6,9 @@
   "directories": {
     "test": "test"
   },
+  "engines": {
+    "node": "7.6.0"
+  },
   "scripts": {
     "test": "DEBUG=tic-tac-toe,tic-tac-toe:* mocha test/server.spec.js && karma start --single-run",
     "start": "NODE_ENV=production node server/index.js",
