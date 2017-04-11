@@ -1,0 +1,22 @@
+html, body, .wrap {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+.wrap {
+  display: flex;
+}
+
+.content {
+  margin: auto;
+  text-align: center;
+}
+
+.content p {
+  font-family: sans-serif;
+  margin: 0 0 10px 0;
+}
