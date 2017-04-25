@@ -57,9 +57,10 @@ app.use(async (ctx, next) => {
 app.use(async (ctx, next) => {
   if (ctx.path === '/' || ctx.path === '/index.html') {
     let game = games.addGame()
-    // We should delete a game if no one joins it
-    // (otherwise, DOS attack is very possible).
-    setTimeout(() => { if (game.players === 0) games.destroyGame(game) }, 5000)
+    setTimeout(() => {
+      // Remove a game if no one joins it.
+      if (game.players === 0) games.destroyGame(game)
+    }, 15000)
     ctx.redirect(`/${game.id}`)
   }
 
